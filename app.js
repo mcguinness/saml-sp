@@ -212,7 +212,12 @@ app.get("/profile", function(req, res) {
 
 app.get('/logout', function(req, res) {
   if (spOptions.logoutUrl) {
-    strategy.logout(req, res);
+    strategy.logout(req, function(err, request){
+      if(!err){
+        //redirect to the IdP Logout URL
+        res.redirect(request);
+      }
+    });
   } else {
     req.logout();
     res.redirect('/login')
@@ -280,7 +285,8 @@ if (argv.idpMetaUrl) {
     console.log('[SAML IdP Metadata]\n', metadata);
     console.log();
     spOptions.entryPoint = metadata.sso.redirectUrl || spOptions.idpSsoUrl;
-    spOptions.cert = metadata.sso.signatureKey || spOptions.cert;
+    spOptions.logoutUrl = metadata.slo.redirectUrl || spOptions.logoutUrl;
+    spOptions.cert = metadata.signingKey || spOptions.cert;
     startServer();
   })
 } else {

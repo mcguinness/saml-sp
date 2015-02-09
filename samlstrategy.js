@@ -122,6 +122,18 @@ SamlStrategy.parseIdentityProviderMetadata = function(url, callback) {
 
       parser.parseString(xml, function (err, metadata) {
 
+        var getBindingLocation = function(serviceEl, bindingUri) {
+         var location;
+         if (serviceEl && serviceEl.length > 0) {
+            serviceEl.forEach(function(element, index, array) {
+              if (element.$.Binding.toLowerCase() === bindingUri) {
+                location = element.$.Location;
+              }
+            });
+          }
+          return location;
+        };
+
         if (err) {
           return callback(err, null);
         }
@@ -132,7 +144,7 @@ SamlStrategy.parseIdentityProviderMetadata = function(url, callback) {
           if (metadata.EntityDescriptor.IDPSSODescriptor && metadata.EntityDescriptor.IDPSSODescriptor.length === 1) {
 
             ssoEl = metadata.EntityDescriptor.IDPSSODescriptor[0];
-            result.sso.signRequest = ssoEl.$.WantAuthnRequestsSigned;
+            result.signRequest = ssoEl.$.WantAuthnRequestsSigned;
 
             if (ssoEl.KeyDescriptor && ssoEl.KeyDescriptor.length > 0) {
               for (var i=0; i<ssoEl.KeyDescriptor.length; i++) {       
@@ -145,7 +157,7 @@ SamlStrategy.parseIdentityProviderMetadata = function(url, callback) {
                   ssoEl.KeyDescriptor[i].KeyInfo[0].X509Data[0].X509Certificate &&
                   ssoEl.KeyDescriptor[i].KeyInfo[0].X509Data[0].X509Certificate.length === 1) {
 
-                  result.sso.signatureKey = ssoEl.KeyDescriptor[i].KeyInfo[0].X509Data[0].X509Certificate[0]._;
+                  result.signingKey = ssoEl.KeyDescriptor[i].KeyInfo[0].X509Data[0].X509Certificate[0]._;
                 }
               }
             }
@@ -159,29 +171,25 @@ SamlStrategy.parseIdentityProviderMetadata = function(url, callback) {
               });
 
               if (nameIds.indexOf('urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress';
               } else if (nameIds.indexOf('urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified';
               } else if (nameIds.indexOf('urn:oasis:names:tc:SAML:2.0:nameid-format:transient') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient';
               } else if (nameIds.indexOf('urn:oasis:names:tc:SAML:2.0:nameid-format:persistent') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent';
               } else if (nameIds.indexOf('urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos';
               } else if (nameIds.indexOf('urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName') >= 0) {
-                result.sso.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName';
+                result.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName';
               }
             }
 
-            if (ssoEl.SingleSignOnService && ssoEl.SingleSignOnService.length > 0) {
-              ssoEl.SingleSignOnService.forEach(function(element, index, array) {
-                if (element.$.Binding.toLowerCase() === 'urn:oasis:names:tc:saml:2.0:bindings:http-redirect') {
-                  result.sso.redirectUrl = element.$.Location;
-                } else if (element.$.Binding.toLowerCase() === 'urn:oasis:names:tc:saml:2.0:bindings:http-post') {
-                  result.sso.postUrl = element.$.Location;
-                }
-              });
-            }
+            result.sso.redirectUrl = getBindingLocation(ssoEl.SingleSignOnService, 'urn:oasis:names:tc:saml:2.0:bindings:http-redirect');
+            result.sso.postUrl = getBindingLocation(ssoEl.SingleSignOnService, 'urn:oasis:names:tc:saml:2.0:bindings:http-post');
+
+            result.slo.redirectUrl = getBindingLocation(ssoEl.SingleLogoutService, 'urn:oasis:names:tc:saml:2.0:bindings:http-redirect');
+            result.slo.postUrl = getBindingLocation(ssoEl.SingleLogoutService, 'urn:oasis:names:tc:saml:2.0:bindings:http-post');
           }
         }
       });
