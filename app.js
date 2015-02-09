@@ -7,6 +7,7 @@ var express             = require('express'),
     os                  = require('os'),
     fs                  = require('fs'),
     http                = require('http'),
+    https               = require('https'),
     path                = require('path'),
     hbs                 = require('hbs'),
     logger              = require('morgan'),
@@ -22,7 +23,7 @@ var express             = require('express'),
  */
 
 var app                 = express(),
-    server              = http.createServer(app),
+    httpServer,
     strategy,
     startServer;
 
@@ -83,10 +84,42 @@ var argv = yargs
       required: false,
       string: true,
       default: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'     
-    }               
+    },
+    httpsPrivateKey: {
+      description: 'Web Server TLS/SSL Private Key (pem)',
+      required: false,
+      string: true,
+    },
+    httpsCert: {
+      description: 'Web Server TLS/SSL Certificate (pem)',
+      required: false,
+      string: true,
+    },
+    https: {
+      description: 'Enables HTTPS Listener (requires httpsPrivateKey and httpsCert)',
+      required: true,
+      boolean: true,
+      default: false
+    }
   })
   .example('\t$0 --idpSsoUrl http://rain.okta1.com:1802/app/raincloud59_testaiwsaml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem', '')
   .check(function(argv, aliases) {
+    if (argv.https) {
+
+      if (!fs.existsSync(argv.httpsPrivateKey)) {
+        return 'HTTPS Private Key "' + argv.httpsPrivateKey + '" is not a valid file path';
+      }
+
+      if (!fs.existsSync(argv.httpsCert)) {
+        return 'HTTPS Certificate "' + argv.httpsCert + '" is not a valid file path';
+      }
+
+      argv.httpsPrivateKey = fs.readFileSync(argv.httpsPrivateKey).toString();
+      argv.httpsCert = fs.readFileSync(argv.httpsCert).toString();
+    }
+  })
+  .check(function(argv, aliases) {
+    var cert;
 
     if (argv.idpMetaUrl === undefined && 
       (argv.idpSsoUrl === undefined || argv.cert === undefined)) {
@@ -99,7 +132,8 @@ var argv = yargs
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid file path';
       }
 
-      cert = fs.readFileSync(argv.cert);
+      cert = fs.readFileSync(argv.cert).toString();
+
       if (!argv.cert.match(/-----BEGIN (\w*)-----([^-]*)-----END (\w*)-----/g)) {
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid PEM file';
       }
@@ -129,7 +163,7 @@ var spOptions = {
   audiencekey:          argv.audience,
   identifierFormat:     argv.idFormat,
   acceptedClockSkewMs:  2000,
-  logoutUrl:            argv.sloUrl, 
+  logoutUrl:            argv.idpSloUrl,
   cert:                 argv.cert,
   privateCert:          fs.readFileSync('./server-key.pem', 'utf-8'),
   profileMapper:        function(profile, done) {
@@ -195,6 +229,13 @@ app.get("/login",
   }
 );
 
+app.get('/saml/sso',
+  passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
+  function(req, res) {
+    res.redirect('/profile');
+  }
+);
+
 app.post('/saml/sso',
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
@@ -211,7 +252,7 @@ app.get("/profile", function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  if (spOptions.logoutUrl) {
+  if (req.isAuthenticated() && spOptions.logoutUrl) {
     strategy.logout(req, function(err, request){
       if(!err){
         //redirect to the IdP Logout URL
@@ -220,7 +261,7 @@ app.get('/logout', function(req, res) {
     });
   } else {
     req.logout();
-    res.redirect('/login')
+    res.render("logout");
   }
 });
 
@@ -259,14 +300,20 @@ startServer = function() {
   passport.use(strategy);
 
 
+  httpServer = argv.https ?
+    https.createServer({ key: argv.httpsPrivateKey, cert: argv.httpsCert }, app) :
+    http.createServer(app);
+
+
   console.log();
   console.log('starting server...');
-  server.listen(app.get('port'), function() {
-    var address  = server.address(),
+  httpServer.listen(app.get('port'), function() {
+    var scheme   = argv.https ? 'https' : 'http',
+        address  = httpServer.address(),
         hostname = os.hostname();
         baseUrl  = address.address === '0.0.0.0' ? 
-          'http://' + hostname + ':' + address.port :
-          'http://localhost:' + address.port
+          scheme + '://' + hostname + ':' + address.port :
+          scheme + '://localhost:' + address.port;
     
     console.log('listening on port: ' + app.get('port'));
     console.log();
