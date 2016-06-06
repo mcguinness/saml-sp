@@ -1,0 +1,129 @@
+<div class="col-md-8 col-md-offset-2">
+  <form id="settings" class="form-settings form-horizontal" role="form" method="POST">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Service Provider Settings</h3>
+      </div>
+      <div class="panel-body">
+
+        <div class="form-group">
+          <label for="issuer" class="col-sm-3 control-label">Issuer</label>
+          <div class="col-sm-9">
+            <input id="issuer" class="form-control" name="issuer" type="text" required="" value="{{sp.issuer}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="authnRequestBinding" class="col-sm-3 control-label control-label-break">Authentication Request Binding</label>
+          <div class="col-sm-9">
+            <select id="authnRequestBinding" class="form-control" name="authnRequestBinding">
+              {{#select sp.authnRequestBinding}}
+              <option value="HTTP-POST">HTTP-POST</option>
+              <option value="HTTP-Redirect">HTTP-Redirect</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signRequest" class="col-sm-3 control-label">Sign Authentication Request</label>
+          <div class="col-sm-9">
+            <select id="signRequest" class="form-control" name="signRequest">
+              {{#select sp.signRequest}}
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signatureAlgorithm" class="col-sm-3 control-label">Signature Algorithm</label>
+          <div class="col-sm-9">
+            <select id="signatureAlgorithm" class="form-control" name="signatureAlgorithm">
+              {{#select sp.signatureAlgorithm}}
+              <option value="sha1">RSA-SHA1</option>
+              <option value="sha256">RSA-SHA256</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="disableRequestedAuthnContext" class="col-sm-3 control-label">Request Authentication Context Class</label>
+          <div class="col-sm-9">
+            <select id="disableRequestedAuthnContext" class="form-control" name="disableRequestedAuthnContext">
+              {{#select sp.disableRequestedAuthnContext}}
+              <option value="false">Yes</option>
+              <option value="true">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="authnContext" class="col-sm-3 control-label control-label-break">Requested Authentication Context Class</label>
+          <div class="col-sm-9">
+            <select id="authnContext" class="form-control" name="authnContext">
+              {{#select sp.authnContext}}
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol">InternetProtocol</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword">InternetProtocolPassword</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos">Kerberos</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered">MobileOneFactorUnregistered</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered">MobileTwoFactorUnregistered</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract">MobileOneFactorContract</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract">MobileTwoFactorContract</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Password">Password</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport">PasswordProtectedTransport</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSessionv">PreviousSessionv
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:X509">X509</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PGP">PGP</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI">SPKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig">XMLDSig</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard">Smartcard</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI">SmartcardPKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI">SoftwarePKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony">Telephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony">NomadTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony">PersonalTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony">AuthenticatedTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword">SecureRemotePassword</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient">TLSClient</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken">TimeSyncToken</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified">unspecified</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="skipRequestCompression" class="col-sm-3 control-label control-label-break">Skip Authentication Request Compression</label>
+          <div class="col-sm-9">
+            <select id="skipRequestCompression" class="form-control" name="skipRequestCompression">
+              {{#select sp.skipRequestCompression}}
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="acceptedClockSkewMs" class="col-sm-3 control-label control-label-break">Assertion Validation Clock Skew (Ms)</label>
+          <div class="col-sm-9">
+            <input id="acceptedClockSkewMs" class="form-control" name="acceptedClockSkewMs" type="number" required="" value="{{sp.acceptedClockSkewMs}}">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-12 text-right">
+        <a href="/" class="btn btn-default input-xlarge">Cancel</a>
+        <button type="submit" class="btn btn-default input-xlarge">Save</button>
+      </div>
+    </div>
+
+  </form>
+</div>

@@ -1,6 +1,6 @@
 {
   "name": "saml-sp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Simple SAML Service Provider (SP) for node.js.",
   "main": "app.js",
   "private": true,
@@ -16,8 +16,8 @@
     "hbs": "~2.8.0",
     "morgan": "~1.5.1",
     "passport": "^0.2.1",
+    "passport-saml": "^0.15.0",
     "request": "^2.65.0",
-    "saml-lib": "^0.1.12",
     "xml2js": "^0.4.4",
     "yargs": "^1.3.3"
   }
