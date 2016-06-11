@@ -4,6 +4,7 @@
  */
 
 var express             = require('express'),
+    _                   = require('underscore'),
     os                  = require('os'),
     fs                  = require('fs'),
     http                = require('http'),
@@ -24,7 +25,7 @@ var express             = require('express'),
  * Globals
  */
 
-var app                 = express(),
+var app = express(),
     httpServer,
     strategy,
     startServer;
@@ -161,15 +162,6 @@ var argv = yargs
   .argv;
 
 
-console.log();
-console.log('Listener Port:\n\t' + argv.port);
-console.log('SP Issuer URI:\n\t' + argv.issuer);
-console.log('SP Audience URI:\n\t' + argv.audience);
-console.log('SP NameID Format:\n\t' + argv.idFormat);
-console.log('IdP SSO ACS URL:\n\t' + argv.idpSsoUrl);
-console.log('IdP Metadata URL:\n\t' + argv.idpMetaUrl);
-console.log();
-
 /**
  * SAML Service Provider Configuration.
  */
@@ -181,7 +173,7 @@ var spOptions = {
   audiencekey:                  argv.audience,
   identifierFormat:             argv.idFormat,
   acceptedClockSkewMs:          2000,
-  logoutUrl:                    argv.idpSloUrl,
+  logoutUrl:                    argv.idpSloUrl || 'N/A',
   cert:                         argv.cert,
   signRequest:                  true,
   signatureAlgorithm:           'sha256',
@@ -254,7 +246,7 @@ passport.deserializeUser(function(user, done) {
 
 
 app.get("/login", function (req, res, next) {
-    if (req.session.relayState) {
+    if (_.isString(req.session.relayState)) {
       req.query.RelayState = req.session.relayState;
     }
     spOptions.forceAuthn = (req.query.forceauthn !== undefined);
@@ -304,20 +296,25 @@ app.get("/profile", function(req, res) {
 
 app.get('/logout', function(req, res) {
   if (req.isAuthenticated()) {
-    if (spOptions.logoutUrl) {
-      strategy.logout(req, function(err, request) {
+    if (_.isString(spOptions.logoutUrl) && spOptions.logoutUrl !== 'N/A') {
+      strategy.logout(req, function(err, sloRequestUrl) {
         if(!err) {
-          console.log('Sending SLO Request with Binding [HTTP-Redirect]');
+          console.log('Sending SLO Request [%s] with Binding [HTTP-Redirect]', sloRequestUrl);
           //redirect to the IdP Logout URL
-          res.redirect(request);
+          res.redirect(sloRequestUrl);
+        } else {
+          throw err;
         }
       });
     } else {
       console.log('User %s successfully logged out', req.user.nameID);
-      req.logout();
+      req.session.destroy();
+      res.render("logout");
     }
+  } else {
+    res.render("logout");
   }
-  res.render("logout");
+
 });
 
 app.get(['/settings'], function(req, res, next) {
@@ -405,10 +402,16 @@ startServer = function() {
 
     console.log('listening on port: ' + app.get('port'));
     console.log();
-    console.log('SAML Service Provider ACS');
-    console.log('\tBinding => urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
-    console.log('\tURL     => ' + baseUrl + '/saml/sso')
+    console.log('SP Issuer URI:\n\t' + spOptions.issuer);
+    console.log('SP Audience URI:\n\t' + spOptions.audiencekey);
+    console.log('SP NameID Format:\n\t' + spOptions.identifierFormat);
+    console.log('SP ACS Binding:\n\turn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
+    console.log('SP ACS URL:\n\t' + baseUrl + '/saml/sso')
     console.log();
+    console.log('IdP SSO ACS URL:\n\t' + spOptions.entryPoint);
+    console.log('IdP SLO URL:\n\t' + spOptions.logoutUrl);
+    console.log();
+
   });
 }
 
@@ -420,8 +423,12 @@ if (argv.idpMetaUrl) {
     console.log();
     console.log('[SAML IdP Metadata]\n', metadata);
     console.log();
-    spOptions.entryPoint = metadata.sso.redirectUrl || spOptions.idpSsoUrl;
-    spOptions.logoutUrl = metadata.slo.redirectUrl || spOptions.logoutUrl;
+    if (_.isString(metadata.sso.redirectUrl)) {
+      spOptions.entryPoint = metadata.sso.redirectUrl;
+    }
+    if (_.isString(metadata.slo.redirectUrl)) {
+      spOptions.logoutUrl = metadata.slo.redirectUrl;
+    }
     spOptions.cert = metadata.signingKey || spOptions.cert;
     startServer();
   })
