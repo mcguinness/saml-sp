@@ -184,19 +184,7 @@ var spOptions = {
   skipRequestCompression:       false,
   authnRequestBinding:          'HTTP-Redirect',
   validateInResponseTo:         true,
-  privateCert:          argv.spPrivateKey,
-  profileMapper:        function(profile, done) {
-                          console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
-                          return done(null, {
-                            nameID: profile.nameID,
-                            nameIDFormat: profile.nameIDFormat,
-                            issuer: profile.issuer,
-                            email : profile.email,
-                            displayName : profile.displayName,
-                            firstName : profile.firstName,
-                            lastName : profile.lastName
-                          });
-                        }
+  privateCert:          argv.spPrivateKey
 };
 
 /**
@@ -211,11 +199,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.set('view options', { layout: 'layout' });
 
-// Register Helpers
-hbs.registerHelper('select', function(selected, options) {
-  return options.fn(this).replace(
-    new RegExp(' value=\"' + selected + '\"'),
-    '$& selected="selected"');
+hbs.registerHelper('ifArray', function(item, options) {
+  if(Array.isArray(item)) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
 });
 
 // middleware
@@ -276,7 +265,7 @@ app.post('/saml/sso',
 app.post('/saml/slo',
   function (req, res, next) {
     if (req.isAuthenticated()) {
-      console.log('Attempting to logout user %s via SAML SLO', req.user.nameID);
+      console.log('Attempting to logout user %s via SAML SLO', req.user.subject.name);
     }
     next();
   },
@@ -288,7 +277,7 @@ app.post('/saml/slo',
 
 app.get("/profile", function(req, res) {
     if(req.isAuthenticated()){
-      res.render("profile", { user: req.user });
+      res.render("profile", req.user);
     } else {
       res.redirect('/login');
     }
@@ -297,6 +286,12 @@ app.get("/profile", function(req, res) {
 app.get('/logout', function(req, res) {
   if (req.isAuthenticated()) {
     if (_.isString(spOptions.logoutUrl) && spOptions.logoutUrl !== 'N/A') {
+      // We profile mapped the request user and need to map it back to expected profile for logout
+      req.user = {
+        nameID: req.user.subject.name,
+        nameIDFormat: req.user.subject.format,
+        sessionIndex: req.user.sessionIndex
+      };
       strategy.logout(req, function(err, sloRequestUrl) {
         if(!err) {
           console.log('Sending SLO Request [%s] with Binding [HTTP-Redirect]', sloRequestUrl);
@@ -307,7 +302,7 @@ app.get('/logout', function(req, res) {
         }
       });
     } else {
-      console.log('User %s successfully logged out', req.user.nameID);
+      console.log('User %s successfully logged out', req.user.subject.name);
       req.session.destroy();
       res.render("logout");
     }
@@ -381,7 +376,20 @@ startServer = function() {
 
   // Register SAML Strategy with Options
 
-  strategy = new SamlStrategy(spOptions, spOptions.profileMapper);
+  strategy = new SamlStrategy(spOptions, function(profile, done) {
+    console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
+    return done(null, {
+      issuer: profile.issuer._,
+      sessionIndex: profile.sessionIndex,
+      subject: {
+        name: profile.nameID,
+        format: profile.nameIDFormat
+      },
+      claims: _.chain(profile)
+                .omit('issuer', 'nameID', 'nameIDFormat', 'sessionIndex')
+                .value()
+    });
+  });
   passport.use(strategy);
 
 
@@ -400,7 +408,7 @@ startServer = function() {
           scheme + '://' + hostname + ':' + address.port :
           scheme + '://localhost:' + address.port;
 
-    console.log('listening on port: ' + app.get('port'));
+    console.log('\n\t' + baseUrl);
     console.log();
     console.log('SP Issuer URI:\n\t' + spOptions.issuer);
     console.log('SP Audience URI:\n\t' + spOptions.audiencekey);

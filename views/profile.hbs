@@ -1,37 +1,48 @@
 <div class="col-md-6 col-md-offset-3">
 	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">SSO User</h3>
-	  </div>
 	  <div class="panel-body">
 	  	<form class="form-horizontal">
+
+	  		<legend>Identity Provider</legend>
 				<div class="form-group">
-				  <label for="userName" class="col-sm-3 control-label">Subject Name ID</label>
+				  <label for="issuer" class="col-sm-3 control-label">Issuer</label>
 				  <div class="col-sm-9">
-				    <p id="userName" class="form-control-static">{{user.nameID}}</p>
+				    <p id="issuer" class="form-control-static">{{issuer}}</p>
+				  </div>
+				</div>
+
+				<legend>Subject</legend>
+
+				<div class="form-group">
+				  <label for="nameID" class="col-sm-3 control-label">Name ID</label>
+				  <div class="col-sm-9">
+				    <p id="nameID" class="form-control-static">{{subject.name}}</p>
 				  </div>
 				</div>
 
 				<div class="form-group">
-				  <label for="firstName" class="col-sm-3 control-label">First Name</label>
+				  <label for="nameIDFormat" class="col-sm-3 control-label">Format</label>
 				  <div class="col-sm-9">
-				    <p id="firstName" class="form-control-static">{{user.firstName}}</p>
+				    <p id="nameIDFormat" class="form-control-static">{{subject.format}}</p>
 				  </div>
 				</div>
 
-				<div class="form-group">
-				  <label for="firstName" class="col-md-3 control-label">Last Name</label>
-				  <div class="col-sm-9">
-				    <p id="lastName" class="form-control-static">{{user.lastName}}</p>
-				  </div>
-				</div>
+				<legend>Claims</legend>
 
-				<div class="form-group">
-				  <label for="firstName" class="col-md-3 control-label">Email</label>
-				  <div class="col-md-9">
-				    <p id="email" class="form-control-static">{{user.email}}</p>
-				  </div>
-				</div>
+				{{#each claims}}
+					<div class="form-group">
+					  <label for="{{@key}}" class="col-sm-3 control-label">{{@key}}</label>
+					  <div class="col-sm-9">
+							{{#ifArray this}}
+								{{#each this}}
+							    <p class="form-control-static">{{this}}</p>
+								{{/each}}
+							{{else}}
+								<p class="form-control-static">{{this}}</p>
+							{{/ifArray}}
+					  </div>
+					</div>
+        {{/each}}
 
 				<div class="form-group">
 		      <div class="col-md-12 text-right">
