@@ -141,19 +141,17 @@ var argv = yargs
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid file path';
       }
 
-      cert = fs.readFileSync(argv.cert).toString();
-
+      argv.cert = fs.readFileSync(argv.cert, 'utf-8').toString();
       if (!argv.cert.match(/-----BEGIN (\w*)-----([^-]*)-----END (\w*)-----/g)) {
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid PEM file';
       }
-      argv.cert = cert;
     }
 
     if (argv.spPrivateKey !== undefined) {
       if (!fs.existsSync(argv.spPrivateKey)) {
         return 'SP Request Signing Private Key "' + argv.spPrivateKey + '" is not a valid file path';
       }
-      argv.spPrivateKey = fs.readFileSync(argv.spPrivateKey, 'utf-8');
+      argv.spPrivateKey = fs.readFileSync(argv.spPrivateKey, 'utf-8').toString();
       if (!argv.spPrivateKey.match(/-----BEGIN RSA PRIVATE KEY-----([^-]*)-----END RSA PRIVATE KEY-----/g)) {
         return 'SP Request Signing Private Key "' + argv.cert + '" is not a valid PEM file';
       }
