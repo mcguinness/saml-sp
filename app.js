@@ -207,6 +207,13 @@ hbs.registerHelper('ifArray', function(item, options) {
   }
 });
 
+hbs.registerHelper('select', function(selected, options) {
+    return options.fn(this).replace(
+        new RegExp(' value=\"' + selected + '\"'),
+        '$& selected="selected"');
+});
+
+
 // middleware
 app.use(logger(':date> :method :url - {:referrer} => :status (:response-time ms)'));
 app.use(bodyParser.urlencoded({ extended: false }));
