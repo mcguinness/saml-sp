@@ -182,7 +182,21 @@ var spOptions = {
   skipRequestCompression:       false,
   authnRequestBinding:          'HTTP-Redirect',
   validateInResponseTo:         true,
-  privateCert:          argv.spPrivateKey
+  privateCert:          argv.spPrivateKey,
+  verify: function(profile, done) {
+    console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
+    return done(null, {
+      issuer: profile.issuer._,
+      sessionIndex: profile.sessionIndex,
+      subject: {
+        name: profile.nameID,
+        format: profile.nameIDFormat
+      },
+      claims: _.chain(profile)
+                .omit('issuer', 'nameID', 'nameIDFormat', 'sessionIndex')
+                .value()
+    });
+  }
 };
 
 /**
@@ -206,9 +220,9 @@ hbs.registerHelper('ifArray', function(item, options) {
 });
 
 hbs.registerHelper('select', function(selected, options) {
-    return options.fn(this).replace(
-        new RegExp(' value=\"' + selected + '\"'),
-        '$& selected="selected"');
+  return options.fn(this).replace(
+    new RegExp(' value=\"' + selected + '\"'),
+    '$& selected="selected"');
 });
 
 
@@ -341,7 +355,7 @@ app.post(['/settings'], function(req, res, next) {
       spOptions[key] = parseInt(req.body[key], '10');
     }
 
-    strategy = new SamlStrategy(spOptions, spOptions.profileMapper);
+    strategy = new SamlStrategy(spOptions, spOptions.verify);
     passport.use(strategy);
   });
 
@@ -381,20 +395,7 @@ startServer = function() {
 
   // Register SAML Strategy with Options
 
-  strategy = new SamlStrategy(spOptions, function(profile, done) {
-    console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
-    return done(null, {
-      issuer: profile.issuer._,
-      sessionIndex: profile.sessionIndex,
-      subject: {
-        name: profile.nameID,
-        format: profile.nameIDFormat
-      },
-      claims: _.chain(profile)
-                .omit('issuer', 'nameID', 'nameIDFormat', 'sessionIndex')
-                .value()
-    });
-  });
+  strategy = new SamlStrategy(spOptions, spOptions.verify);
   passport.use(strategy);
 
 
