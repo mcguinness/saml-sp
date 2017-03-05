@@ -7,15 +7,15 @@
       <div class="panel-body">
 
         <div class="form-group">
-          <label for="issuer" class="col-sm-3 control-label">Issuer</label>
-          <div class="col-sm-9">
+          <label for="issuer" class="col-sm-5 control-label">Issuer</label>
+          <div class="col-sm-7">
             <input id="issuer" class="form-control" name="issuer" type="text" required="" value="{{sp.issuer}}">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="authnRequestBinding" class="col-sm-3 control-label control-label-break">Authentication Request Binding</label>
-          <div class="col-sm-9">
+          <label for="authnRequestBinding" class="col-sm-5 control-label control-label-break">Authentication Request Binding</label>
+          <div class="col-sm-7">
             <select id="authnRequestBinding" class="form-control" name="authnRequestBinding">
               {{#select sp.authnRequestBinding}}
               <option value="HTTP-POST">HTTP-POST</option>
@@ -26,8 +26,8 @@
         </div>
 
         <div class="form-group">
-          <label for="signRequest" class="col-sm-3 control-label">Sign Authentication Request</label>
-          <div class="col-sm-9">
+          <label for="signRequest" class="col-sm-5 control-label">Sign Authentication Request</label>
+          <div class="col-sm-7">
             <select id="signRequest" class="form-control" name="signRequest">
               {{#select sp.signRequest}}
               <option value="true">Yes</option>
@@ -38,8 +38,8 @@
         </div>
 
         <div class="form-group">
-          <label for="signatureAlgorithm" class="col-sm-3 control-label">Signature Algorithm</label>
-          <div class="col-sm-9">
+          <label for="signatureAlgorithm" class="col-sm-5 control-label">Signature Algorithm</label>
+          <div class="col-sm-7">
             <select id="signatureAlgorithm" class="form-control" name="signatureAlgorithm">
               {{#select sp.signatureAlgorithm}}
               <option value="sha1">RSA-SHA1</option>
@@ -50,8 +50,8 @@
         </div>
 
         <div class="form-group">
-          <label for="disableRequestedAuthnContext" class="col-sm-3 control-label">Request Authentication Context Class</label>
-          <div class="col-sm-9">
+          <label for="disableRequestedAuthnContext" class="col-sm-5 control-label">Request Authentication Context Class</label>
+          <div class="col-sm-7">
             <select id="disableRequestedAuthnContext" class="form-control" name="disableRequestedAuthnContext">
               {{#select sp.disableRequestedAuthnContext}}
               <option value="false">Yes</option>
@@ -62,8 +62,8 @@
         </div>
 
         <div class="form-group">
-          <label for="authnContext" class="col-sm-3 control-label control-label-break">Requested Authentication Context Class</label>
-          <div class="col-sm-9">
+          <label for="authnContext" class="col-sm-5 control-label control-label-break">Requested Authentication Context Class</label>
+          <div class="col-sm-7">
             <select id="authnContext" class="form-control" name="authnContext">
               {{#select sp.authnContext}}
               <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol">InternetProtocol</option>
@@ -97,8 +97,8 @@
         </div>
 
         <div class="form-group">
-          <label for="skipRequestCompression" class="col-sm-3 control-label control-label-break">Skip Authentication Request Compression</label>
-          <div class="col-sm-9">
+          <label for="skipRequestCompression" class="col-sm-5 control-label control-label-break">Skip Authentication Request Compression</label>
+          <div class="col-sm-7">
             <select id="skipRequestCompression" class="form-control" name="skipRequestCompression">
               {{#select sp.skipRequestCompression}}
               <option value="true">Yes</option>
@@ -109,8 +109,8 @@
         </div>
 
         <div class="form-group">
-          <label for="acceptedClockSkewMs" class="col-sm-3 control-label control-label-break">Assertion Validation Clock Skew (Ms)</label>
-          <div class="col-sm-9">
+          <label for="acceptedClockSkewMs" class="col-sm-5 control-label control-label-break">Assertion Validation Clock Skew (Ms)</label>
+          <div class="col-sm-7">
             <input id="acceptedClockSkewMs" class="form-control" name="acceptedClockSkewMs" type="number" required="" value="{{sp.acceptedClockSkewMs}}">
           </div>
         </div>

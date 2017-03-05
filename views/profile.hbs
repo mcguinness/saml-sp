@@ -1,9 +1,10 @@
 <div class="col-md-6 col-md-offset-3">
+
   <div class="panel panel-default">
+    <div class="panel-heading">Identity Provider</div>
     <div class="panel-body">
       <form class="form-horizontal">
 
-        <legend>Identity Provider</legend>
         <div class="form-group">
           <label for="issuer" class="col-sm-3 control-label">Issuer</label>
           <div class="col-sm-9">
@@ -11,7 +12,14 @@
           </div>
         </div>
 
-        <legend>Subject</legend>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Subject</div>
+    <div class="panel-body">
+      <form class="form-horizontal">
 
         <div class="form-group">
           <label for="nameID" class="col-sm-3 control-label">Name ID</label>
@@ -27,8 +35,14 @@
           </div>
         </div>
 
-        <legend>Claims</legend>
+      </form>
+    </div>
+  </div>
 
+  <div class="panel panel-default">
+    <div class="panel-heading">Claims</div>
+    <div class="panel-body">
+      <form class="form-horizontal">
         {{#each claims}}
           <div class="form-group">
             <label for="{{@key}}" class="col-sm-3 control-label">{{@key}}</label>
@@ -43,14 +57,17 @@
             </div>
           </div>
         {{/each}}
-
-        <div class="form-group">
-          <div class="col-md-12 text-right">
-            <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
-            <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
-          </div>
-        </div>
       </form>
     </div>
   </div>
+
+<form class="form-horizontal">
+  <div class="form-group">
+    <div class="col-md-12 text-right">
+      <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
+      <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
+    </div>
+  </div>
+</form>
+
 </div>
