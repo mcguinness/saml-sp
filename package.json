@@ -1,7 +1,7 @@
 {
   "name": "saml-sp",
-  "version": "0.2.0",
-  "description": "Simple SAML Service Provider (SP) for node.js.",
+  "version": "0.3.0",
+  "description": "Simple SAML Service Provider (SP) for express.js",
   "main": "app.js",
   "private": true,
   "author": "Karl McGuinness",
