@@ -37,12 +37,10 @@ var app = express(),
 console.log();
 console.log('loading configuration...');
 var argv = yargs
-  .usage('\nSimple SP for SAML 2.0 WebSSO Profile\n\n' +
-      'Launches Web Server that trusts SAML assertions issues by an Identity Provider (IdP)\n\n' +
-      'Usage:\n\t$0 --idpSsoUrl {url} --cert {pem file}\n\n$0 --idpMetaUrl {url}', {
+  .usage('\nSimple SAML SP for SAML 2.0 WebSSO Profile', {
 
     port: {
-      description: 'Web server listener port',
+      description: 'Web Server listener port',
       required: true,
       alias: 'p',
       number: true,
@@ -72,9 +70,10 @@ var argv = yargs
       string: true,
       required: false
     },
-    cert: {
+    idpCert: {
       description: 'IdP Signing Certificate (PEM)',
       string: true,
+      alias: 'cert',
       required: false
     },
     idpMetaUrl: {
@@ -97,11 +96,13 @@ var argv = yargs
     httpsPrivateKey: {
       description: 'Web Server TLS/SSL Private Key (pem)',
       required: false,
+      alias: 'key',
       string: true,
     },
     httpsCert: {
       description: 'Web Server TLS/SSL Certificate (pem)',
       required: false,
+      alias: 'cert',
       string: true,
     },
     https: {
@@ -114,11 +115,9 @@ var argv = yargs
   .example('\t$0 --idpSsoUrl http://rain.okta1.com:1802/app/raincloud59_testaiwsaml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem', '')
   .check(function(argv, aliases) {
     if (argv.https) {
-
       if (!fs.existsSync(argv.httpsPrivateKey)) {
         return 'HTTPS Private Key "' + argv.httpsPrivateKey + '" is not a valid file path';
       }
-
       if (!fs.existsSync(argv.httpsCert)) {
         return 'HTTPS Certificate "' + argv.httpsCert + '" is not a valid file path';
       }
@@ -126,13 +125,13 @@ var argv = yargs
       argv.httpsPrivateKey = fs.readFileSync(argv.httpsPrivateKey).toString();
       argv.httpsCert = fs.readFileSync(argv.httpsCert).toString();
     }
+    return true;
   })
   .check(function(argv, aliases) {
     var cert;
 
     if (argv.idpMetaUrl === undefined &&
       (argv.idpSsoUrl === undefined || argv.cert === undefined)) {
-
       return 'IdP SAML Metadata URL (idpMetaUrl) or IdP SSO Assertion Consumer URL (idpSsoUrl) and IdP Signing Certificate (cert) is required!'
     }
 
@@ -140,7 +139,6 @@ var argv = yargs
       if (!fs.existsSync(argv.cert)) {
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid file path';
       }
-
       argv.cert = fs.readFileSync(argv.cert, 'utf-8').toString();
       if (!argv.cert.match(/-----BEGIN (\w*)-----([^-]*)-----END (\w*)-----/g)) {
         return 'IdP Signing Certificate "' + argv.cert + '" is not a valid PEM file';
@@ -156,6 +154,7 @@ var argv = yargs
         return 'SP Request Signing Private Key "' + argv.cert + '" is not a valid PEM file';
       }
     }
+    return true;
   })
   .argv;
 
@@ -172,7 +171,7 @@ var spOptions = {
   identifierFormat:             argv.idFormat,
   acceptedClockSkewMs:          2000,
   logoutUrl:                    argv.idpSloUrl || 'N/A',
-  cert:                         argv.cert,
+  cert:                         argv.idpCert,
   signRequest:                  true,
   signatureAlgorithm:           'sha256',
   forceAuthn:                   false,

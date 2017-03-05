@@ -1,58 +1,56 @@
 <div class="col-md-6 col-md-offset-3">
-	<div class="panel panel-default">
-	  <div class="panel-body">
-	  	<form class="form-horizontal">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <form class="form-horizontal">
 
-	  		<legend>Identity Provider</legend>
-				<div class="form-group">
-				  <label for="issuer" class="col-sm-3 control-label">Issuer</label>
-				  <div class="col-sm-9">
-				    <p id="issuer" class="form-control-static">{{issuer}}</p>
-				  </div>
-				</div>
+        <legend>Identity Provider</legend>
+        <div class="form-group">
+          <label for="issuer" class="col-sm-3 control-label">Issuer</label>
+          <div class="col-sm-9">
+            <p id="issuer" class="form-control-static">{{issuer}}</p>
+          </div>
+        </div>
 
-				<legend>Subject</legend>
+        <legend>Subject</legend>
 
-				<div class="form-group">
-				  <label for="nameID" class="col-sm-3 control-label">Name ID</label>
-				  <div class="col-sm-9">
-				    <p id="nameID" class="form-control-static">{{subject.name}}</p>
-				  </div>
-				</div>
+        <div class="form-group">
+          <label for="nameID" class="col-sm-3 control-label">Name ID</label>
+          <div class="col-sm-9">
+            <p id="nameID" class="form-control-static">{{subject.name}}</p>
+          </div>
+        </div>
 
-				<div class="form-group">
-				  <label for="nameIDFormat" class="col-sm-3 control-label">Format</label>
-				  <div class="col-sm-9">
-				    <p id="nameIDFormat" class="form-control-static">{{subject.format}}</p>
-				  </div>
-				</div>
+        <div class="form-group">
+          <label for="nameIDFormat" class="col-sm-3 control-label">Format</label>
+          <div class="col-sm-9">
+            <p id="nameIDFormat" class="form-control-static">{{subject.format}}</p>
+          </div>
+        </div>
 
-				<legend>Claims</legend>
+        <legend>Claims</legend>
 
-				{{#each claims}}
-					<div class="form-group">
-					  <label for="{{@key}}" class="col-sm-3 control-label">{{@key}}</label>
-					  <div class="col-sm-9">
-							{{#ifArray this}}
-								{{#each this}}
-							    <p class="form-control-static">{{this}}</p>
-								{{/each}}
-							{{else}}
-								<p class="form-control-static">{{this}}</p>
-							{{/ifArray}}
-					  </div>
-					</div>
+        {{#each claims}}
+          <div class="form-group">
+            <label for="{{@key}}" class="col-sm-3 control-label">{{@key}}</label>
+            <div class="col-sm-9">
+              {{#ifArray this}}
+                {{#each this}}
+                  <p class="form-control-static">{{this}}</p>
+                {{/each}}
+              {{else}}
+                <p class="form-control-static">{{this}}</p>
+              {{/ifArray}}
+            </div>
+          </div>
         {{/each}}
 
-				<div class="form-group">
-		      <div class="col-md-12 text-right">
-		        <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
-		        <a href="/logout" class="btn btn-default input-xlarge">Sign-out</a>
-		      </div>
-		    </div>
-			</form>
-	  </div>
-	</div>
+        <div class="form-group">
+          <div class="col-md-12 text-right">
+            <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
+            <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
-
-
