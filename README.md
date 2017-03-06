@@ -16,25 +16,29 @@ The following features are supported:
 
 # Installation
 
-  npm install
+`npm install`
 
 ## Usage
 
 ### Static IdP Configuration
 
-	`node app.js --idpSsoUrl {url} --cert {pem} --iss {issuer}`
-
-### Dynamic IdP Configuration from SAML IdP Metadata
-
-  `node app.js --idpMetaUrl {url}`
+`node app.js --idpSsoUrl {url} --cert {pem} --iss {issuer}`
 
 #### Example
 
-	`node app.js --idpMetaUrl https://example.okta.com/app/exkikd6nFJIdpcrZR0g3/sso/saml/metadata`
+`app.js --idpSsoUrl https://example.okta.com/app/example_saml_2/exknnoOGPcwWSnKUK0g3/sso/saml --cert ./idp-cert.pem --iss http://www.okta.com/exknnoOGPcwWSnKUK0g3`
+
+### Dynamic IdP Configuration from SAML IdP Metadata
+
+`node app.js --idpMetaUrl {url}`
+
+#### Example
+
+`node app.js --idpMetaUrl https://example.okta.com/app/exkikd6nFJIdpcrZR0g3/sso/saml/metadata`
 
 ### Options
 
-  `node app.js  --help`
+`node app.js  --help`
 
 ```
 Options:
