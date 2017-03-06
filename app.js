@@ -34,9 +34,7 @@ var app = express(),
  * Configuration
  */
 
-console.log();
-console.log('loading configuration...');
-var argv = yargs
+const argv = yargs
   .usage('\nSimple SAML SP for SAML 2.0 WebSSO Profile', {
 
     port: {
@@ -112,7 +110,10 @@ var argv = yargs
       default: false
     }
   })
-  .example('\t$0 --idpSsoUrl http://rain.okta1.com:1802/app/raincloud59_testaiwsaml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem', '')
+  .example('\t$0 --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem',
+    'Static IdP configuration')
+  .example('\t$0 --idpMetaUrl https://example.okta.com/app/exknnoOGPcwWSnKUK0g3/sso/saml/metadata',
+    'Dynamic IdP configuration with SAML Metadata')
   .check(function(argv, aliases) {
     if (argv.https) {
       if (!fs.existsSync(argv.httpsPrivateKey)) {
@@ -156,6 +157,8 @@ var argv = yargs
     }
     return true;
   })
+  .help()
+  .wrap(null)
   .argv;
 
 
