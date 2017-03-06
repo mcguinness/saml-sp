@@ -26,7 +26,7 @@ The following features are supported:
 
 #### Example
 
-`app.js --idpSsoUrl https://example.okta.com/app/example_saml_2/exknnoOGPcwWSnKUK0g3/sso/saml --cert ./idp-cert.pem --iss http://www.okta.com/exknnoOGPcwWSnKUK0g3`
+`app.js --idpSsoUrl https://example.okta.com/app/example_saml_2/exknnoOGPcwWSnKUK0g3/sso/saml --idpCert ./idp-cert.pem --iss http://www.okta.com/exknnoOGPcwWSnKUK0g3`
 
 ### Dynamic IdP Configuration from SAML IdP Metadata
 
@@ -47,7 +47,7 @@ Options:
   --audience, --aud         SP Audience URI  [string] [default: "urn:example:sp"]
   --idpSsoUrl               IdP SSO Assertion Consumer URL (SSO URL)  [string]
   --idpSloUrl               IdP Single Logout Assertion Consumer URL (SLO URL)  [string]
-  --idpCert, --cert         IdP Signing Certificate (PEM)  [string]
+  --idpCert                 IdP Signing Certificate (PEM)  [string]
   --idpMetaUrl              IdP SAML Metadata URL  [string]
   --spPrivateKey            SP Request Signature Private Key (pem)  [string] [default: "./server-key.pem"]
   --idFormat                Assertion Subject NameID Format  [string] [default: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"]
@@ -57,7 +57,7 @@ Options:
   --help                    Show help  [boolean]
 
 Examples:
-    app.js --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem  Static IdP configuration
+    app.js --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --idpCert ./idp-cert.pem  Static IdP configuration
     app.js --idpMetaUrl https://example.okta.com/app/exknnoOGPcwWSnKUK0g3/sso/saml/metadata                             Dynamic IdP configuration with SAML Metadata
 
 IdP SAML Metadata URL (idpMetaUrl) or IdP SSO Assertion Consumer URL (idpSsoUrl) and IdP Signing Certificate (cert) is required!

@@ -71,7 +71,6 @@ const argv = yargs
     idpCert: {
       description: 'IdP Signing Certificate (PEM)',
       string: true,
-      alias: 'cert',
       required: false
     },
     idpMetaUrl: {
@@ -110,7 +109,7 @@ const argv = yargs
       default: false
     }
   })
-  .example('\t$0 --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --cert ./idp-cert.pem',
+  .example('\t$0 --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --idpCert ./idp-cert.pem',
     'Static IdP configuration')
   .example('\t$0 --idpMetaUrl https://example.okta.com/app/exknnoOGPcwWSnKUK0g3/sso/saml/metadata',
     'Dynamic IdP configuration with SAML Metadata')
