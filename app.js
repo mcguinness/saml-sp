@@ -107,6 +107,12 @@ const argv = yargs
       required: true,
       boolean: true,
       default: false
+    },
+      relayState: {
+      description: 'Relay State',
+      required: false,
+      string: true,
+      default: null
     }
   })
   .example('\t$0 --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --idpCert ./idp-cert.pem',
@@ -184,6 +190,7 @@ var spOptions = {
   authnRequestBinding:          'HTTP-Redirect',
   validateInResponseTo:         true,
   privateCert:          argv.spPrivateKey,
+  additionalParams:{'RelayState':argv.relayState},
   verify: function(profile, done) {
     console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
     return done(null, {
@@ -258,7 +265,7 @@ app.get("/login", function (req, res, next) {
     if (_.isString(req.session.relayState)) {
       req.query.RelayState = req.session.relayState;
     }
-    spOptions.forceAuthn = (req.query.forceauthn !== undefined);
+    //spOptions.forceAuthn = (req.query.forceauthn !== undefined); go based off the parameter on startup?
     console.log('Sending AuthnRequest with Binding [' + spOptions.authnRequestBinding + '] and ForceAuthn [' + spOptions.forceAuthn + ']');
     next();
   },
@@ -271,6 +278,7 @@ app.get("/login", function (req, res, next) {
 app.get('/saml/sso',
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
+    req.session.passedRelayState = req.body.RelayState;
     res.redirect('/profile');
   }
 );
@@ -278,6 +286,7 @@ app.get('/saml/sso',
 app.post('/saml/sso',
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
+    req.session.passedRelayState = req.body.RelayState;
     res.redirect('/profile');
   }
 );
@@ -297,6 +306,7 @@ app.post('/saml/slo',
 
 app.get("/profile", function(req, res) {
     if(req.isAuthenticated()){
+      req.user.relayState = req.session.passedRelayState
       res.render("profile", req.user);
     } else {
       res.redirect('/login');
@@ -425,6 +435,7 @@ startServer = function() {
     console.log();
     console.log('IdP SSO ACS URL:\n\t' + spOptions.entryPoint);
     console.log('IdP SLO URL:\n\t' + spOptions.logoutUrl);
+    console.log('Relay State:\n\t' + spOptions.additionalParams.RelayState)
     console.log();
 
   });
