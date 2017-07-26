@@ -54,6 +54,7 @@ Options:
   --httpsPrivateKey, --key  Web Server TLS/SSL Private Key (pem)  [string]
   --httpsCert, --cert       Web Server TLS/SSL Certificate (pem)  [string]
   --https                   Enables HTTPS Listener (requires httpsPrivateKey and httpsCert)  [boolean] [required] [default: false]
+  --relayState, --rs        Relay State  [string]
   --help                    Show help  [boolean]
 
 Examples:
@@ -84,6 +85,7 @@ The following settings can be customized at runtime within the `/settings` page:
 - Requested Authentication Context Class
 - Skip Authentication Request Compression
 - Assertion Validation Clock Skew (Ms)
+- Default Relay State
 
 #  URL Routes
 
