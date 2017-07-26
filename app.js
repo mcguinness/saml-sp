@@ -107,6 +107,12 @@ const argv = yargs
       required: true,
       boolean: true,
       default: false
+    },
+    relayState: {
+      description: 'Relay State',
+      required: false,
+      string: true,
+      alias: 'rs'
     }
   })
   .example('\t$0 --idpSsoUrl https://example.okta.com/app/example_saml_2/exk7s3gpHWyQaKyFx0g4/sso/saml --idpCert ./idp-cert.pem',
@@ -184,6 +190,7 @@ var spOptions = {
   authnRequestBinding:          'HTTP-Redirect',
   validateInResponseTo:         true,
   privateCert:          argv.spPrivateKey,
+  defaultRelayState: argv.relayState || '/profile',
   verify: function(profile, done) {
     console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
     return done(null, {
@@ -233,7 +240,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: "You tell me what you want and I'll tell you what you get",
+  secret: 'You tell me what you want and I\'ll tell you what you get',
   resave: false,
   saveUninitialized: true}));
 app.use(passport.initialize());
@@ -248,29 +255,43 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
+/**
+ * helpers
+ */
+
+function getRequestBindingParams(req) {
+  var paramName = (spOptions.authnRequestBinding === 'HTTP-Redirect') ? 'query' : 'body';
+  if (req[paramName] === undefined) {
+    req[paramName] = {};
+  }
+  return req[paramName]
+}
+
 
 /**
  * Routes
  */
 
-
-app.get("/login", function (req, res, next) {
-    if (_.isString(req.session.relayState)) {
-      req.query.RelayState = req.session.relayState;
-    }
-    spOptions.forceAuthn = (req.query.forceauthn !== undefined);
-    console.log('Sending AuthnRequest with Binding [' + spOptions.authnRequestBinding + '] and ForceAuthn [' + spOptions.forceAuthn + ']');
-    next();
-  },
-  passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
-  function(req, res) {
-    res.redirect('/');
+app.get('/login', function (req, res, next) {
+  var bindingParams = getRequestBindingParams(req);
+  req.session.authnRequest = {
+    relayState: req.session.returnTo || spOptions.defaultRelayState,
+    forceAuthn: (bindingParams.forceauthn !== undefined)
   }
-);
+  bindingParams.RelayState = req.session.authnRequest.relayState;
+  console.log('Sending AuthnRequest with Binding [' + spOptions.authnRequestBinding + '], ' +
+    'RelayState [' + req.session.authnRequest.relayState + '] and ' +
+    'ForceAuthn [' + req.session.authnRequest.forceAuthn + ']');
+  delete req.session.returnTo;
+  passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true })(req, res, next);
+});
 
 app.get('/saml/sso',
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
+    req.session.authnResponse = {
+      relayState: req.query.RelayState
+    }
     res.redirect('/profile');
   }
 );
@@ -278,6 +299,9 @@ app.get('/saml/sso',
 app.post('/saml/sso',
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
+    req.session.authnResponse = {
+      relayState: req.body.RelayState
+    }
     res.redirect('/profile');
   }
 );
@@ -287,17 +311,20 @@ app.post('/saml/slo',
     if (req.isAuthenticated()) {
       console.log('Attempting to logout user %s via SAML SLO', req.user.subject.name);
     }
-    next();
   },
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true }),
   function(req, res) {
-    res.render("logout");
+    res.render('logout');
   }
 );
 
-app.get("/profile", function(req, res) {
+app.get(['/', '/profile'], function(req, res) {
     if(req.isAuthenticated()){
-      res.render("profile", req.user);
+      res.render('profile', {
+        request: req.session.authnRequest,
+        response: req.session.authnResponse,
+        profile: req.user
+      });
     } else {
       res.redirect('/login');
     }
@@ -324,10 +351,10 @@ app.get('/logout', function(req, res) {
     } else {
       console.log('User %s successfully logged out', req.user.subject.name);
       req.session.destroy();
-      res.render("logout");
+      res.render('logout');
     }
   } else {
-    res.render("logout");
+    res.render('logout');
   }
 
 });
@@ -341,10 +368,10 @@ app.get(['/settings'], function(req, res, next) {
 app.post(['/settings'], function(req, res, next) {
   Object.keys(req.body).forEach(function(key) {
     switch(req.body[key].toLowerCase()){
-      case "true": case "yes": case "1":
+      case 'true': case 'yes': case '1':
         spOptions[key] = true;
         break;
-      case "false": case "no": case "0":
+      case 'false': case 'no': case '0':
         spOptions[key] = false;
         break;
       default:
@@ -371,9 +398,11 @@ app.get('/error', function(req, res) {
 // catch 404 and forward as relay state
 app.use(function(req, res) {
   if (!req.isAuthenticated()) {
-    req.session.relayState = req.originalUrl;
+    req.session.returnTo = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    res.redirect('/profile');
   }
-  res.redirect('/login');
 });
 
 // development error handler
@@ -422,6 +451,7 @@ startServer = function() {
     console.log('SP NameID Format:\n\t' + spOptions.identifierFormat);
     console.log('SP ACS Binding:\n\turn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
     console.log('SP ACS URL:\n\t' + baseUrl + '/saml/sso')
+    console.log('SP Default Relay State:\n\t' + spOptions.defaultRelayState);
     console.log();
     console.log('IdP SSO ACS URL:\n\t' + spOptions.entryPoint);
     console.log('IdP SLO URL:\n\t' + spOptions.logoutUrl);

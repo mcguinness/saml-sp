@@ -8,7 +8,7 @@
         <div class="form-group">
           <label for="issuer" class="col-sm-3 control-label">Issuer</label>
           <div class="col-sm-9">
-            <p id="issuer" class="form-control-static">{{issuer}}</p>
+            <p id="issuer" class="form-control-static">{{profile.issuer}}</p>
           </div>
         </div>
 
@@ -24,14 +24,14 @@
         <div class="form-group">
           <label for="nameID" class="col-sm-3 control-label">Name ID</label>
           <div class="col-sm-9">
-            <p id="nameID" class="form-control-static">{{subject.name}}</p>
+            <p id="nameID" class="form-control-static">{{profile.subject.name}}</p>
           </div>
         </div>
 
         <div class="form-group">
           <label for="nameIDFormat" class="col-sm-3 control-label">Format</label>
           <div class="col-sm-9">
-            <p id="nameIDFormat" class="form-control-static">{{subject.format}}</p>
+            <p id="nameIDFormat" class="form-control-static">{{profile.subject.format}}</p>
           </div>
         </div>
 
@@ -43,7 +43,7 @@
     <div class="panel-heading">Claims</div>
     <div class="panel-body">
       <form class="form-horizontal">
-        {{#each claims}}
+        {{#each profile.claims}}
           <div class="form-group">
             <label for="{{@key}}" class="col-sm-3 control-label">{{@key}}</label>
             <div class="col-sm-9">
@@ -61,13 +61,36 @@
     </div>
   </div>
 
-<form class="form-horizontal">
-  <div class="form-group">
-    <div class="col-md-12 text-right">
-      <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
-      <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
+  <div class="panel panel-default">
+    <div class="panel-heading">Protocol</div>
+    <div class="panel-body">
+      <form class="form-horizontal">
+
+        <div class="form-group">
+          <label for="reqRelayState" class="col-sm-3 control-label">Request RelayState</label>
+          <div class="col-sm-9">
+            <p id="reqRelayState" class="form-control-static">{{request.relayState}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="resRelayState" class="col-sm-3 control-label">Response RelayState</label>
+          <div class="col-sm-9">
+            <p id="resRelayState" class="form-control-static">{{response.relayState}}</p>
+          </div>
+        </div>
+
+      </form>
     </div>
   </div>
-</form>
+
+  <form class="form-horizontal">
+    <div class="form-group">
+      <div class="col-md-12 text-right">
+        <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
+        <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
+      </div>
+    </div>
+  </form>
 
 </div>
