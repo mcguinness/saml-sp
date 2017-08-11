@@ -49,6 +49,7 @@ Options:
   --idpSloUrl               IdP Single Logout Assertion Consumer URL (SLO URL)  [string]
   --idpCert                 IdP Signing Certificate (PEM)  [string]
   --idpMetaUrl              IdP SAML Metadata URL  [string]
+  --acsUrls                 Array of paths to be used as SP AssertionConsumerServiceUrls [array]
   --spPrivateKey            SP Request Signature Private Key (pem)  [string] [default: "./server-key.pem"]
   --idFormat                Assertion Subject NameID Format  [string] [default: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"]
   --httpsPrivateKey, --key  Web Server TLS/SSL Private Key (pem)  [string]
@@ -100,3 +101,4 @@ Route       | Description
 `/saml/sso` | SSO Assertion Consumer endpoint
 `/saml/slo` | SLO endpoint
 
+- Include the query parameter `?acsurl=configured/path` on the `/login` route in order for a non-default Assertion Consumer endpoint to be included in the AuthN Request. It should match one of the paths configured at server startup under the `acsUrls` option

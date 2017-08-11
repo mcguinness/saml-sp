@@ -78,6 +78,11 @@ const argv = yargs
       string: true,
       required: false
     },
+    acsUrls: {
+      description: 'Additional AssertionConsumerService URLS',
+      array: true,
+      required: false
+    },
     spPrivateKey: {
       description: 'SP Request Signature Private Key (pem)',
       string: true,
@@ -104,7 +109,7 @@ const argv = yargs
     },
     https: {
       description: 'Enables HTTPS Listener (requires httpsPrivateKey and httpsCert)',
-      required: true,
+      required: false,
       boolean: true,
       default: false
     },
@@ -180,6 +185,7 @@ var spOptions = {
   acceptedClockSkewMs:          2000,
   logoutUrl:                    argv.idpSloUrl || 'N/A',
   cert:                         argv.idpCert,
+  acsUrls:                      argv.acsUrls || [],
   signRequest:                  true,
   signatureAlgorithm:           'sha256',
   forceAuthn:                   false,
@@ -272,6 +278,7 @@ function getRequestBindingParams(req) {
  * Routes
  */
 
+
 app.get('/login', function (req, res, next) {
   var bindingParams = getRequestBindingParams(req);
   req.session.authnRequest = {
@@ -279,9 +286,20 @@ app.get('/login', function (req, res, next) {
     forceAuthn: (bindingParams.forceauthn !== undefined)
   }
   bindingParams.RelayState = req.session.authnRequest.relayState;
+
+  // Desired ACS Url
+  callback = undefined;
+  if (_.isString(req.query.acsUrl)) {
+    callback =  req.protocol + '://' + req.get('host') + '/' + req.query.acsUrl;
+  }
+  spOptions.callbackUrl = callback;
+
   console.log('Sending AuthnRequest with Binding [' + spOptions.authnRequestBinding + '], ' +
     'RelayState [' + req.session.authnRequest.relayState + '] and ' +
     'ForceAuthn [' + req.session.authnRequest.forceAuthn + ']');
+  if (callback != undefined) {
+    console.log('\tRequesting AssertionConsumerServiceURL=\'' + callback + '\' in the AuthnRequest.');
+  }
   delete req.session.returnTo;
   passport.authenticate('saml', { failureRedirect: '/error', failureFlash: true })(req, res, next);
 });
@@ -305,6 +323,26 @@ app.post('/saml/sso',
     res.redirect('/profile');
   }
 );
+
+spOptions.acsUrls.forEach(function(acsUrl) {
+  app.get('/' + acsUrl,
+    passport.authenticate('saml', { failureRediret: '/error', failureFlash: true}),
+    function(req, res) {
+      req.session.authnResponse = {
+        relayState: req.body.RelayState
+      }
+      res.redirect('/profile#ACSUrl=' + acsUrl);
+  });
+  app.post( '/' + acsUrl,
+    passport.authenticate('saml', { failureRediret: '/error', failureFlash: true}),
+    function(req, res) {
+      req.session.authnResponse = {
+        relayState: req.body.RelayState
+      }
+      res.redirect('/profile#ACSUrl=' + acsUrl);
+  });
+
+});
 
 app.post('/saml/slo',
   function (req, res, next) {
