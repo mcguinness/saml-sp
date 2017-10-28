@@ -56,7 +56,9 @@ module.exports.create = (config) => {
 
     getMetadataParams: function(req) {
       return {
+        protocol: this.protocol,
         entityID: this.audience,
+        realm: this.audience,
         cert: removeHeaders(this.spCert),
         acsUrls: this.acsUrls.map(url => getReqUrl(req, url)),
         sloUrl: getReqUrl(req, SLO_URL),
@@ -64,7 +66,14 @@ module.exports.create = (config) => {
       }
     },
 
-    getAuthnRequestParams: function(forceAuthn, relayState, acsUrl) {
+    getRequestSecurityTokenParams: function(wreply, wctx) {
+      return {
+        wreply: wreply,
+        wctx:   wctx || this.relayState,
+      }
+    },
+
+    getAuthnRequestParams: function(acsUrl, forceAuthn, relayState) {
       const params = {
         protocol:             this.protocol,
         realm:                this.audience,
@@ -85,7 +94,7 @@ module.exports.create = (config) => {
         signatureAlgorithm:   this.signatureAlgorithm,
         digestAlgorithm:      this.digestAlgorithm,
         deflate:              this.deflate,
-        RelayState:           relayState || this.defaultRelayState,
+        RelayState:           relayState || this.relayState,
         failureRedirect:      this.failureRedirect,
         failureFlash:         this.failureFlash
       }
@@ -99,12 +108,13 @@ module.exports.create = (config) => {
       return params;
     },
 
-    getSamlResponseParams: function(destinationUrl) {
+    getResponseParams: function(destinationUrl) {
       return {
         protocol: this.protocol,
         thumbprint: this.idpThumbprint,
         cert: this.idpCert,
         realm: this.audience,
+        identityProviderUrl:  this.idpSsoUrl,  //wsfed
         recipientUrl: destinationUrl,
         destinationUrl: destinationUrl,
         decryptionKey: this.spKey,
@@ -160,6 +170,10 @@ module.exports.create = (config) => {
       '$& selected="selected"');
   });
 
+  hbs.registerHelper('ifSamlp', function(options) {
+    return config.protocol === 'samlp' ? options.fn(this) : options.inverse(this);
+  });
+
 
   // middleware
   app.use(logger(':date> :method :url - {:referrer} => :status (:response-time ms)'));
@@ -174,7 +188,7 @@ module.exports.create = (config) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const strategy = new SamlStrategy(config.getSamlResponseParams(),
+  const strategy = new SamlStrategy(config.getResponseParams(),
     (profile, done) => {
       console.log();
       console.log('Assertion => ' + JSON.stringify(profile, null, '\t'));
@@ -197,7 +211,9 @@ module.exports.create = (config) => {
       });
     }
   );
-  strategy.logout = SamlpLogout(config.getLogoutParams());
+  if (config.protocol === 'samlp') {
+    strategy.logout = SamlpLogout(config.getLogoutParams());
+  }
   passport.use(strategy);
 
 
@@ -215,18 +231,25 @@ module.exports.create = (config) => {
    */
 
   app.get('/login', function (req, res, next) {
-    console.log('query', req.query);
-    const params = config.getAuthnRequestParams(
-      req.query.forceauthn === '' || req.query.forceAuthn === '' || req.query.forceauthn || req.query.forceAuthn,
-      req.session.returnTo,
-      req.query.acsUrl ?
-        getReqUrl(req, req.query.acsUrl) :
-        getReqUrl(req, config.requestAcsUrl)
-    );
+    const acsUrl = req.query.acsUrl ?
+      getReqUrl(req, req.query.acsUrl) :
+      getReqUrl(req, config.requestAcsUrl);
 
-    console.log('Generating AuthnRequest with Params ', params);
-    // Set Session State for SAMLResponse
-    req.session.authnRequest = params;
+    var params;
+    switch (config.protocol) {
+      case 'samlp':
+        params = config.getAuthnRequestParams(
+          acsUrl,
+          req.query.forceauthn === '' || req.query.forceAuthn === '' || req.query.forceauthn || req.query.forceAuthn,
+          req.session.returnTo);
+        break;
+      case 'wsfed':
+        params = config.getRequestSecurityTokenParams(acsUrl, req.session.returnTo);
+        break;
+    }
+
+    console.log('Generating SSO Request with Params ', params);
+    req.session.ssoRequest = params;
     delete req.session.returnTo;
 
     passport.authenticate('wsfed-saml2', params)(req, res, next);
@@ -235,18 +258,20 @@ module.exports.create = (config) => {
   config.acsUrls.forEach(function(acsUrl) {
     app.post(getPath(acsUrl),
       function (req, res, next) {
-        if (req.method === 'POST' && req.body && req.body.SAMLResponse) {
-          const respCtx = {
-            RelayState: req.body.RelayState,
-            Url: getReqUrl(req),
-            Xml: Buffer.from(req.body.SAMLResponse, 'base64').toString('utf8')
+        if (req.method === 'POST' && req.body && (req.body.SAMLResponse || req.body.wresult)) {
+          const ssoResponse = {
+            state: req.body.RelayState || req.body.wctx,
+            url: getReqUrl(req),
+            xml: Buffer.from(req.body.SAMLResponse || req.body.wresult, 'base64').toString('utf8')
           }
-          req.session.authnResponse = respCtx;
-          console.log('Received SAMLResponse message on ACS URL %s', respCtx.Url)
-          console.log(respCtx.Xml);
+          req.session.ssoResponse = ssoResponse;
+          console.log();
+          console.log('Received SSO Response on ACS URL %s', ssoResponse.url)
+          console.log(ssoResponse.xml);
+          console.log();
 
-          const params = config.getSamlResponseParams(respCtx.Url);
-          console.log('Validating SAMLResponse message with Params ', params);
+          const params = config.getResponseParams(ssoResponse.url);
+          console.log('Validating SSO Response with Params ', params);
           _.extend(strategy.options, params);
           passport.authenticate('wsfed-saml2', params)(req, res, next);
         } else {
@@ -260,7 +285,7 @@ module.exports.create = (config) => {
 
   app.post(SLO_URL,
     function (req, res, next) {
-      if (req.isAuthenticated()) {
+      if (config.protocol === 'samlp' && req.isAuthenticated()) {
         const username = req.user.subject.name;
         console.log('Attempting to logout user %s via SAML SLO', username);
         strategy.logout(req, res, next);
@@ -273,20 +298,21 @@ module.exports.create = (config) => {
   );
 
   app.get(['/', '/profile'], function(req, res) {
-      if(req.isAuthenticated()){
-        res.render('profile', {
-          request: req.session.authnRequest,
-          response: req.session.authnResponse,
-          profile: req.user
-        });
-      } else {
-        res.redirect('/login');
-      }
+    if(req.isAuthenticated()){
+      res.render('profile', {
+        protocol: config.protocol === 'samlp' ? 'SAML Protocol' : 'WS-Federation Protocol',
+        request: req.session.ssoRequest,
+        response: req.session.ssoResponse,
+        profile: req.user
+      });
+    } else {
+      res.redirect('/login');
+    }
   });
 
   app.get('/logout', function (req, res, next) {
     if (req.isAuthenticated()) {
-      if (_.isString(config.idpSloUrl)) {
+      if (config.protocol === 'samlp' && config.idpSloUrl) {
         console.log("Sending SLO request for user %s", req.user.subject.name);
         req.samlSessionIndex = req.user.authnContext.sessionIndex;
         req.samlNameID = {
@@ -312,9 +338,18 @@ module.exports.create = (config) => {
   });
 
   app.get('/settings', function(req, res, next) {
-    res.render('settings', {
-      config: config
-    });
+    switch (config.protocol) {
+      case 'samlp' :
+        res.render('settings-samlp', {
+          config: config
+        });
+        break;
+      case 'wsfed':
+        res.render('settings-wsfed', {
+          config: config
+        });
+        break;
+    }
   });
 
   app.post('/settings', function(req, res, next) {
@@ -336,7 +371,7 @@ module.exports.create = (config) => {
       }
     });
 
-    console.log('Updated SP Configuration => \n', config);
+    console.log('Updated Configuration => \n', config);
     res.redirect('/');
   });
 

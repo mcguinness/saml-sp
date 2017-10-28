@@ -19,4 +19,18 @@
     <md:NameIDFormat><%= nameIDFormat %></md:NameIDFormat>
     <% for (var i=0; i<acsUrls.length; i++) {%><md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<%= acsUrls[i] %>" index="<%= i + 1%>"/><% } %>
   </md:SPSSODescriptor>
+
+  <RoleDescriptor xsi:type="fed:ApplicationServiceType" xmlns:fed="http://docs.oasis-open.org/wsfed/federation/200706" protocolSupportEnumeration="http://docs.oasis-open.org/wsfed/federation/200706" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <fed:TargetScopes>
+        <EndpointReference xmlns="http://www.w3.org/2005/08/addressing">
+          <Address><%= realm %></Address>
+        </EndpointReference>
+    </fed:TargetScopes>
+    <fed:PassiveRequestorEndpoint>
+        <EndpointReference xmlns="http://www.w3.org/2005/08/addressing">
+          <Address><%= acsUrls[0] %></Address>
+        </EndpointReference>
+    </fed:PassiveRequestorEndpoint>
+  </RoleDescriptor>
+
 </md:EntityDescriptor>

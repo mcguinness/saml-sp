@@ -4,7 +4,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{#ifSamlp}}
     <title>Simple SAML Service Provider (SP)</title>
+    {{else}}
+    <title>Simple WS-Federation Relying Party (RP)</title>
+    {{/ifSamlp}}
     <link type="text/css" rel="stylesheet" href="/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/css/main.css" />
     <!--[if lt IE 9]>
@@ -18,7 +22,11 @@
     <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
+          {{#ifSamlp}}
           <a class="navbar-brand" href="/metadata">Simple SAML Service Provider (SP)</a>
+          {{else}}
+          <a class="navbar-brand" href="/metadata">Simple WS-Federation Relying Party (RP)</a>
+          {{/ifSamlp}}
         </div>
         <div class="navbar-collapse collapse" id="navbar-main">
           <ul class="nav navbar-nav navbar-right">
