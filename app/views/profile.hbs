@@ -1,4 +1,4 @@
-<div class="col-md-6 col-md-offset-3">
+<div class="col-md-8 col-md-offset-2">
 
   <div class="panel panel-default">
     <div class="panel-heading">Identity Provider</div>
@@ -17,7 +17,7 @@
   </div>
 
   <div class="panel panel-default">
-    <div class="panel-heading">Subject</div>
+    <div class="panel-heading">Subject Statement</div>
     <div class="panel-body">
       <form class="form-horizontal">
 
@@ -40,7 +40,30 @@
   </div>
 
   <div class="panel panel-default">
-    <div class="panel-heading">Claims</div>
+    <div class="panel-heading">Authentication Statement</div>
+    <div class="panel-body">
+      <form class="form-horizontal">
+
+        <div class="form-group">
+          <label for="sessionIndex" class="col-sm-3 control-label">Session Index</label>
+          <div class="col-sm-9">
+            <p id="sessionIndex" class="form-control-static">{{profile.authnContext.sessionIndex}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="authnMethod" class="col-sm-3 control-label">Authentication Method</label>
+          <div class="col-sm-9">
+            <p id="authnMethod" class="form-control-static">{{profile.authnContext.authnMethod}}</p>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Attribute Statement (Claims)</div>
     <div class="panel-body">
       <form class="form-horizontal">
         {{#each profile.claims}}
@@ -61,22 +84,53 @@
     </div>
   </div>
 
+
   <div class="panel panel-default">
     <div class="panel-heading">Protocol</div>
     <div class="panel-body">
       <form class="form-horizontal">
 
         <div class="form-group">
+          <label for="reqID" class="col-sm-3 control-label">Request ID</label>
+          <div class="col-sm-9">
+            <p id="reqID" class="form-control-static">{{request.request_id}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reqAuthnContextClassRef" class="col-sm-3 control-label">Request Authentication Context Class Reference</label>
+          <div class="col-sm-9">
+            <p id="reqAuthnContextClassRef" class="form-control-static">{{request.authnContext}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reqAcsUrl" class="col-sm-3 control-label">Request Assertion Consumer URL</label>
+          <div class="col-sm-9">
+            <p id="reqAcsUrl" class="form-control-static">{{request.callback}}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label for="reqRelayState" class="col-sm-3 control-label">Request RelayState</label>
           <div class="col-sm-9">
-            <p id="reqRelayState" class="form-control-static">{{request.relayState}}</p>
+            <p id="reqRelayState" class="form-control-static">{{request.RelayState}}</p>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+          <label for="reqID" class="col-sm-3 control-label">Response Destination</label>
+          <div class="col-sm-9">
+            <p id="reqID" class="form-control-static">{{response.Url}}</p>
           </div>
         </div>
 
         <div class="form-group">
           <label for="resRelayState" class="col-sm-3 control-label">Response RelayState</label>
           <div class="col-sm-9">
-            <p id="resRelayState" class="form-control-static">{{response.relayState}}</p>
+            <p id="resRelayState" class="form-control-static">{{response.RelayState}}</p>
           </div>
         </div>
 
@@ -87,6 +141,7 @@
   <form class="form-horizontal">
     <div class="form-group">
       <div class="col-md-12 text-right">
+        <a href="/login" class="btn btn-default input-xlarge">Sign-in</a>
         <a href="/login?forceauthn" class="btn btn-default input-xlarge">Force Sign-in</a>
         <a href="/logout" class="btn btn-primary input-xlarge">Sign-out</a>
       </div>

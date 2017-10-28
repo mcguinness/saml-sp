@@ -3,5 +3,5 @@
 npm-debug.log
 node_modules
 logs
-public/bower_components
+app/public/bower_components
 .npmrc

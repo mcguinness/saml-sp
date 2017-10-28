@@ -1,0 +1,9 @@
+<div class="col-md-8 col-md-offset-2">
+  <h1>{{message}}</h1>
+  {{#if error.stack}}
+    <pre>{{error.stack}}</pre>
+  {{/if}}
+  <div class="text-right">
+    <a class="btn btn-primary input-xlarge" href="/login"><i class="fa fa-sign-in"><span>Sign-in again</span></i></a>
+  </div>
+</div>

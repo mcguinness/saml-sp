@@ -1,0 +1,199 @@
+<div class="col-md-8 col-md-offset-2">
+  <form id="settings" class="form-settings form-horizontal" role="form" method="POST">
+
+   <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Identity Provider Settings</h3>
+      </div>
+      <div class="panel-body">
+
+        <div class="form-group">
+          <label for="idpIssuer" class="col-sm-4 control-label">Issuer</label>
+          <div class="col-sm-8">
+            <input id="idpIssuer" class="form-control" name="idpIssuer" type="text" required="" value="{{config.idpIssuer}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="idpSsoUrl" class="col-sm-4 control-label">SSO URL</label>
+          <div class="col-sm-8">
+            <input id="idpSsoUrl" class="form-control" name="idpSsoUrl" type="text" required="" value="{{config.idpSsoUrl}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="idpSsoBinding" class="col-sm-4 control-label control-label-break">Authentication Request Binding</label>
+          <div class="col-sm-8">
+            <select id="idpSsoBinding" class="form-control" name="idpSsoBinding">
+              {{#select config.idpSsoBinding}}
+              <option value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">HTTP-POST</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect">HTTP-Redirect</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="idpSloUrl" class="col-sm-4 control-label">SLO URL</label>
+          <div class="col-sm-8">
+            <input id="idpSloUrl" class="form-control" name="idpSloUrl" type="text" required="" value="{{config.idpSloUrl}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="idpSloBinding" class="col-sm-4 control-label control-label-break">Single Logout Request Binding</label>
+          <div class="col-sm-8">
+            <select id="idpSloBinding" class="form-control" name="idpSloBinding">
+              {{#select config.idpSloBinding}}
+              <option value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">HTTP-POST</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect">HTTP-Redirect</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Service Provider Settings</h3>
+      </div>
+      <div class="panel-body">
+
+        <div class="form-group">
+          <label for="audience" class="col-sm-4 control-label">Audience</label>
+          <div class="col-sm-8">
+            <input id="audience" class="form-control" name="audience" type="text" required="" value="{{config.audience}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signAuthnRequests" class="col-sm-4 control-label">Sign Authentication Request Messages</label>
+          <div class="col-sm-8">
+            <select id="signAuthnRequests" class="form-control" name="signAuthnRequests">
+              {{#select config.signAuthnRequests}}
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signatureAlgorithm" class="col-sm-4 control-label">Signature Algorithm</label>
+          <div class="col-sm-8">
+            <select id="signatureAlgorithm" class="form-control" name="signatureAlgorithm">
+              {{#select config.signatureAlgorithm}}
+              <option value="rsa-sha1">RSA-SHA1</option>
+              <option value="rsa-sha256">RSA-SHA256</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="digestAlgorithm" class="col-sm-4 control-label">Digest Algorithm</label>
+          <div class="col-sm-8">
+            <select id="digestAlgorithm" class="form-control" name="digestAlgorithm">
+              {{#select config.digestAlgorithm}}
+              <option value="sha1">SHA1</option>
+              <option value="sha256">SHA256</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <label for="requestAcsUrl" class="col-sm-4 control-label control-label-break">Request Assertion Consumer URL</label>
+          <div class="col-sm-8">
+            <select id="requestAcsUrl" class="form-control" name="requestAcsUrl">
+                {{#select config.requestAcsUrl}}
+                {{#each config.acsUrls}}
+                  <option value="{{this}}">{{this}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <label for="requestAuthnContext" class="col-sm-4 control-label">Request Authentication Context</label>
+          <div class="col-sm-8">
+            <select id="requestAuthnContext" class="form-control" name="requestAuthnContext">
+              {{#select config.requestAuthnContext}}
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="authnContextClassRef" class="col-sm-4 control-label control-label-break">Authentication Context Class Reference</label>
+          <div class="col-sm-8">
+            <select id="authnContextClassRef" class="form-control" name="authnContextClassRef">
+              {{#select config.authnContextClassRef}}
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol">InternetProtocol</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword">InternetProtocolPassword</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos">Kerberos</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered">MobileOneFactorUnregistered</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered">MobileTwoFactorUnregistered</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract">MobileOneFactorContract</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract">MobileTwoFactorContract</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Password">Password</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport">PasswordProtectedTransport</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSessionv">PreviousSessionv
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:X509">X509</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PGP">PGP</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI">SPKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig">XMLDSig</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard">Smartcard</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI">SmartcardPKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI">SoftwarePKI</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony">Telephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony">NomadTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony">PersonalTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony">AuthenticatedTelephony</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword">SecureRemotePassword</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient">TLSClient</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken">TimeSyncToken</option>
+              <option value="urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified">unspecified</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="deflate" class="col-sm-4 control-label control-label-break">Compress Request (Deflate)</label>
+          <div class="col-sm-8">
+            <select id="deflate" class="form-control" name="deflate">
+              {{#select config.deflate}}
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+              {{/select}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="defaultRelayState" class="col-sm-4 control-label">Default Relay State</label>
+          <div class="col-sm-8">
+            <input id="defaultRelayState" class="form-control" name="defaultRelayState" type="text" value="{{config.defaultRelayState}}">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-12 text-right">
+        <a href="/" class="btn btn-default input-xlarge">Cancel</a>
+        <button type="submit" class="btn btn-primary input-xlarge">Save</button>
+      </div>
+    </div>
+
+  </form>
+</div>
