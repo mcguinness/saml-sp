@@ -40,9 +40,8 @@ function removeHeaders(cert) {
   if (pem && pem.length > 0) {
     return pem[2].replace(/[\n|\r\n]/g, '');
   }
-  return null;
+  return cert;
 };
-
 
 module.exports.create = (config) => {
   const app = express();
@@ -112,7 +111,7 @@ module.exports.create = (config) => {
       return {
         protocol: this.protocol,
         thumbprint: this.idpThumbprint,
-        cert: this.idpCert,
+        cert: removeHeaders(this.idpCert),
         realm: this.audience,
         identityProviderUrl:  this.idpSsoUrl,  //wsfed
         recipientUrl: destinationUrl,
@@ -283,19 +282,36 @@ module.exports.create = (config) => {
       });
   });
 
-  app.post(SLO_URL,
+  const logout = [
     function (req, res, next) {
-      if (config.protocol === 'samlp' && req.isAuthenticated()) {
-        const username = req.user.subject.name;
-        console.log('Attempting to logout user %s via SAML SLO', username);
-        strategy.logout(req, res, next);
-        console.log('User %s successfully logged out', username);
+      if (config.protocol === 'samlp') {
+        if (req.isAuthenticated()) {
+          const username = req.user.subject.name;
+          console.log('Attempting to logout user %s via SAML SLO', username);
+          strategy.logout(req, res, function() {
+            console.log('User %s successfully logged out', username);
+            next();
+          });
+        } else {
+          console.log('No authenticated user to logout');
+          next();
+        }
+      } else {
+        console.log('WS-Fed SLO is not supported!');
+        next();
       }
     },
-    function(req, res) {
+    function (req, res, next) {
+      if (req.session) {
+        console.log('destroying session: ' + req.session.id)
+        req.session.destroy();
+      }
       res.render('logout');
     }
-  );
+  ];
+
+  app.get(SLO_URL,logout);
+  app.post(SLO_URL,logout);
 
   app.get(['/', '/profile'], function(req, res) {
     if(req.isAuthenticated()){

@@ -1,6 +1,6 @@
 {
   "name": "saml-sp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Test Service Provider (SP) for SAML 2.0 Web Browser SSO Profile and Relying Party (RP) for WS-Federation Passive Requestor Profile",
   "author": "Karl McGuinness",
   "keywords": [
@@ -29,20 +29,20 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "body-parser": "~1.18.2",
+    "body-parser": "~1.18.3",
     "connect-flash": "^0.1.1",
     "cookie-parser": "~1.4.3",
     "debug": "~3.1.0",
-    "express": "~4.16.2",
+    "express": "~4.16.3",
     "express-session": "^1.15.6",
     "hbs": "~4.0.1",
     "morgan": "~1.9.0",
     "passport": "^0.4.0",
-    "passport-wsfed-saml2": "^3.0.4",
-    "request": "^2.83.0",
-    "samlp-logout": "^2.3.0",
-    "underscore": "^1.8.3",
+    "passport-wsfed-saml2": "^3.0.10",
+    "request": "^2.87.0",
+    "samlp-logout": "^2.3.1",
+    "underscore": "^1.9.0",
     "xml2js": "^0.4.19",
-    "yargs": "^9.0.1"
+    "yargs": "^11.0.0"
   }
 }
