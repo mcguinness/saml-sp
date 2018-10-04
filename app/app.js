@@ -77,7 +77,6 @@ module.exports.create = (config) => {
         protocol:             this.protocol,
         realm:                this.audience,
         callback:             acsUrl,
-        protocolBinding:      this.idpSsoBinding,
         identityProviderUrl:  this.idpSsoUrl,
         providerName:         this.providerName,
         forceAuthn:           forceAuthn,
@@ -88,7 +87,7 @@ module.exports.create = (config) => {
         requestTemplate:      AUTHN_REQUEST_TEMPLATE({
           ForceAuthn: forceAuthn,
           NameIDFormat: this.requestNameIDFormat,
-          AuthnContext: this.requestAuthnContext,
+          AuthnContext: this.requestAuthnContext
         }),
         signatureAlgorithm:   this.signatureAlgorithm,
         digestAlgorithm:      this.digestAlgorithm,
@@ -113,6 +112,7 @@ module.exports.create = (config) => {
         thumbprint: this.idpThumbprint,
         cert: removeHeaders(this.idpCert),
         realm: this.audience,
+        protocolBinding: this.idpSsoBinding, // lib doesn't use AuthnRequestParams
         identityProviderUrl:  this.idpSsoUrl,  //wsfed
         recipientUrl: destinationUrl,
         destinationUrl: destinationUrl,
@@ -388,6 +388,9 @@ module.exports.create = (config) => {
     });
 
     console.log('Updated Configuration => \n', config);
+    // Force update of global strategy options
+    const params = config.getResponseParams();
+    _.extend(strategy.options, params);
     res.redirect('/');
   });
 
