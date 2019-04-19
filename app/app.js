@@ -195,8 +195,8 @@ module.exports.create = (config) => {
       return done(null, {
         issuer: profile.issuer,
         subject: {
-          name: profile.nameIdAttributes.value,
-          format: profile.nameIdAttributes.Format
+          name: (profile.nameIdAttributes || {}).value,
+          format: (profile.nameIdAttributes || {}).Format
         },
         authnContext: {
           sessionIndex: profile.sessionIndex,
