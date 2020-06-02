@@ -1,6 +1,6 @@
 {
   "name": "saml-sp",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Test Service Provider (SP) for SAML 2.0 Web Browser SSO Profile and Relying Party (RP) for WS-Federation Passive Requestor Profile",
   "author": "Karl McGuinness",
   "keywords": [
@@ -26,23 +26,23 @@
     "start": "node ./bin/server.js"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.0.0"
   },
   "dependencies": {
-    "body-parser": "~1.18.3",
+    "body-parser": "~1.19.0",
     "connect-flash": "^0.1.1",
-    "cookie-parser": "~1.4.4",
+    "cookie-parser": "~1.4.5",
     "debug": "~4.1.1",
-    "express": "~4.16.4",
-    "express-session": "^1.16.1",
-    "hbs": "~4.0.4",
-    "morgan": "~1.9.1",
-    "passport": "^0.4.0",
-    "passport-wsfed-saml2": "^3.0.17",
-    "request": "^2.88.0",
-    "samlp-logout": "^2.3.1",
-    "underscore": "^1.9.1",
-    "xml2js": "^0.4.19",
-    "yargs": "^13.2.2"
+    "express": "~4.17.1",
+    "express-session": "^1.17.1",
+    "got": "^11.2.0",
+    "hbs": "~4.1.1",
+    "morgan": "~1.10.0",
+    "passport": "^0.4.1",
+    "passport-wsfed-saml2": "3.0.13",
+    "samlp-logout": "2.3.3",
+    "underscore": "^1.10.2",
+    "xml2js": "^0.4.23",
+    "yargs": "^15.3.1"
   }
 }
