@@ -41,7 +41,7 @@
     "passport": "^0.4.1",
     "passport-wsfed-saml2": "3.0.13",
     "samlp-logout": "2.3.3",
-    "underscore": "^1.10.2",
+    "underscore": "^1.12.1",
     "xml2js": "^0.4.23",
     "yargs": "^15.3.1"
   }
