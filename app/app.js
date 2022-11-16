@@ -31,7 +31,7 @@ function getPath(path) {
 
 function getReqUrl(req, path) {
   if (req) {
-    return req.protocol + '://' + (req.get('x-forwarded-host') || req.get('host')) + getPath(path || req.originalUrl);
+    return (req.get('x-forwarded-proto') || req.protocol) + '://' + (req.get('x-forwarded-host') || req.get('host')) + getPath(path || req.originalUrl);
   }
 };
 
